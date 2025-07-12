@@ -4,6 +4,7 @@ import { Platform, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from '../../hooks/useColorScheme';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,15 +13,21 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: '#FF4500',
+        tabBarInactiveTintColor: '#666',
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Study Map',
-          tabBarIcon: ({ color }) => <MaterialIcons name="map" size={24} color={color} />,
+          title: 'Study Groups',
+          tabBarIcon: ({ color }) => <Ionicons name="people" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />,
         }}
       />
     </Tabs>
