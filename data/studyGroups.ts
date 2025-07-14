@@ -1,0 +1,58 @@
+export interface StudyGroup {
+  id: string;
+  title: string;
+  subject: 'math' | 'english' | 'science' | 'history' | 'computer' | 'business' | 'art';
+  mood: 'focused' | 'casual' | 'exam_prep' | 'project' | 'review' | 'homework';
+  time: string;
+  location: string;
+  memberCount: number;
+  distance: string;
+  coordinates: [number, number]; // [longitude, latitude]
+}
+
+export const STUDY_GROUPS: StudyGroup[] = [
+  {
+    id: '1',
+    title: 'EECS 280 Study Session',
+    subject: 'computer',
+    mood: 'exam_prep',
+    time: '3:00 PM - 5:00 PM',
+    location: 'Bob and Betty Beyster Building (BBB)',
+    memberCount: 4,
+    distance: '0.2 mi',
+    coordinates: [-83.7174, 42.2927] // BBB coordinates
+  },
+  {
+    id: '2',
+    title: 'Organic Chemistry Review',
+    subject: 'science',
+    mood: 'focused',
+    time: '4:30 PM - 6:30 PM',
+    location: 'Chemistry Building',
+    memberCount: 6,
+    distance: '0.3 mi',
+    coordinates: [-83.7403, 42.2789] // Chemistry Building coordinates
+  },
+  {
+    id: '3',
+    title: 'Calculus II Group',
+    subject: 'math',
+    mood: 'homework',
+    time: '2:00 PM - 4:00 PM',
+    location: 'Mason Hall',
+    memberCount: 5,
+    distance: '0.1 mi',
+    coordinates: [-83.7382, 42.2744] // Mason Hall coordinates
+  },
+  {
+    id: '4',
+    title: 'Business Strategy Project',
+    subject: 'business',
+    mood: 'project',
+    time: '1:00 PM - 3:00 PM',
+    location: 'Ross School of Business',
+    memberCount: 4,
+    distance: '0.4 mi',
+    coordinates: [-83.7382, 42.2723] // Ross coordinates
+  }
+]; 

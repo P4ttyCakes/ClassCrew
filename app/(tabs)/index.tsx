@@ -1,37 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { StudyGroupCard } from '../../components/study-groups/StudyGroupCard';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
 import { Colors } from '../../constants/Colors';
+import { STUDY_GROUPS } from '../../data/studyGroups';
 import { useColorScheme } from '../../hooks/useColorScheme';
 
-const SAMPLE_SESSIONS = [
-  {
-    id: '1',
-    title: 'CS 101 Study Group',
-    location: 'Main Library',
-    subject: 'Computer Science',
-    time: '3:00 PM - 5:00 PM',
-    attendees: 4,
-  },
-  {
-    id: '2',
-    title: 'Biology Final Prep',
-    location: 'Science Building',
-    subject: 'Biology',
-    time: '4:30 PM - 6:30 PM',
-    attendees: 6,
-  },
-  {
-    id: '3',
-    title: 'Calculus II Group',
-    location: 'Math Building',
-    subject: 'Mathematics',
-    time: '2:00 PM - 4:00 PM',
-    attendees: 5,
-  },
-];
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const CARD_WIDTH = SCREEN_WIDTH * 0.85; // 85% of screen width
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -43,65 +20,34 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <ThemedText type="title">Study Sessions</ThemedText>
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: colors.tint }]}
-          onPress={() => console.log('Create session')}>
-          <MaterialIcons name="add" size={24} color="white" />
-        </TouchableOpacity>
       </View>
 
       {/* Session Cards */}
-      <ScrollView style={styles.sessionsContainer} contentContainerStyle={styles.sessionsContent}>
+      <ScrollView 
+        style={styles.sessionsContainer} 
+        contentContainerStyle={styles.sessionsContent}
+        showsVerticalScrollIndicator={false}
+      >
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           Nearby Study Sessions
         </ThemedText>
-        {SAMPLE_SESSIONS.map((session) => (
-          <TouchableOpacity
-            key={session.id}
-            style={[
-              styles.sessionCard,
-              { backgroundColor: colors.cardBackground },
-              selectedSession === session.id && { borderColor: colors.tint },
-            ]}
-            onPress={() => setSelectedSession(session.id)}>
-            <View style={styles.cardHeader}>
-              <View style={styles.cardHeaderLeft}>
-                <Image
-                  source={{ uri: 'https://via.placeholder.com/40' }}
-                  style={styles.hostAvatar}
-                />
-                <View>
-                  <ThemedText type="subtitle">{session.title}</ThemedText>
-                  <ThemedText type="caption" style={{ color: colors.icon }}>
-                    {session.subject}
-                  </ThemedText>
-                </View>
-              </View>
-              <MaterialIcons name="chevron-right" size={24} color={colors.icon} />
+        <View style={styles.cardsContainer}>
+          {STUDY_GROUPS.map((session) => (
+            <View key={session.id} style={styles.cardWrapper}>
+              <StudyGroupCard
+                title={session.title}
+                subject={session.subject}
+                mood={session.mood}
+                time={session.time}
+                location={session.location}
+                memberCount={session.memberCount}
+                distance={session.distance}
+                coordinates={session.coordinates}
+                onPress={() => setSelectedSession(session.id)}
+              />
             </View>
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-            <View style={styles.cardDetails}>
-              <View style={styles.detailRow}>
-                <MaterialIcons name="access-time" size={16} color={colors.icon} />
-                <ThemedText type="caption" style={{ color: colors.icon }}>
-                  {session.time}
-                </ThemedText>
-              </View>
-              <View style={styles.detailRow}>
-                <MaterialIcons name="location-on" size={16} color={colors.icon} />
-                <ThemedText type="caption" style={{ color: colors.icon }}>
-                  {session.location}
-                </ThemedText>
-              </View>
-              <View style={styles.detailRow}>
-                <MaterialIcons name="people" size={16} color={colors.icon} />
-                <ThemedText type="caption" style={{ color: colors.icon }}>
-                  {session.attendees} Attendees
-                </ThemedText>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+          ))}
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -119,71 +65,22 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
   },
-  createButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
   sessionsContainer: {
     flex: 1,
   },
   sessionsContent: {
-    padding: 20,
+    paddingHorizontal: 20,
     paddingTop: 0,
+    paddingBottom: 20,
   },
   sectionTitle: {
     marginBottom: 16,
   },
-  sessionCard: {
-    borderRadius: 12,
-    marginBottom: 12,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  cardsContainer: {
     alignItems: 'center',
   },
-  cardHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  hostAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  divider: {
-    height: 1,
-    marginVertical: 12,
-  },
-  cardDetails: {
-    gap: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
+  cardWrapper: {
+    width: CARD_WIDTH,
+    marginBottom: 20,
+  }
 });

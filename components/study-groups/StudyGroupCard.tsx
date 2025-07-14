@@ -1,8 +1,10 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import React from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const subjectGradients = {
+const subjectGradients: Record<string, [string, string]> = {
   math: ['#3B82F6', '#8B5CF6'],
   english: ['#10B981', '#14B8A6'],
   science: ['#EF4444', '#F97316'],
@@ -30,6 +32,7 @@ type StudyGroupCardProps = {
   location: string;
   memberCount: number;
   distance: string;
+  coordinates: [number, number]; // [longitude, latitude]
   onPress: () => void;
 };
 
@@ -41,8 +44,29 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   location,
   memberCount,
   distance,
+  coordinates,
   onPress
 }) => {
+  const mapContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (Platform.OS === 'web' && mapContainerRef.current) {
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: coordinates,
+        zoom: 15,
+        interactive: false
+      });
+
+      new mapboxgl.Marker()
+        .setLngLat(coordinates)
+        .addTo(map);
+
+      return () => map.remove();
+    }
+  }, [coordinates]);
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <LinearGradient
@@ -73,6 +97,13 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
             </View>
           </View>
         </View>
+
+        {/* Map Container */}
+        <View style={styles.mapContainer}>
+          {Platform.OS === 'web' && (
+            <div ref={mapContainerRef} style={styles.miniMap} />
+          )}
+        </View>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -91,12 +122,9 @@ const styles = StyleSheet.create({
   gradient: {
     borderRadius: 20,
     overflow: 'hidden',
-    aspectRatio: 1.4,
   },
   content: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'space-between',
+    padding: 20,
   },
   header: {
     flexDirection: 'row',
@@ -135,6 +163,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 8,
   },
   location: {
     fontSize: 12,
@@ -152,4 +181,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '500',
   },
+  mapContainer: {
+    height: 250,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.2)',
+  },
+  miniMap: {
+    width: '100%',
+    height: '100%',
+  }
 }); 
