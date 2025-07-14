@@ -9,7 +9,7 @@ import { STUDY_GROUPS } from '../../data/studyGroups';
 // Mapbox access token
 mapboxgl.accessToken = 'pk.eyJ1IjoicGF0dHljYWtlczEyMyIsImEiOiJjbWQwbHowNnkwcnRnMmxxMjZrMXpzM2xpIn0.OSfE2ygeZNGxDOsyWGwsYw';
 
-const CARD_HEIGHT = 200; // Approximate height for study group cards
+const CARD_HEIGHT = 70; // Reduced height for compact cards
 
 export default function MapScreen() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -49,6 +49,9 @@ export default function MapScreen() {
           
           markers.current.push(marker);
         });
+
+        // Add navigation controls
+        map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
       } catch (err) {
         console.error('Error initializing map:', err);
         setError(err instanceof Error ? err.message : 'Failed to initialize map');
@@ -100,9 +103,11 @@ export default function MapScreen() {
                 time={group.time}
                 location={group.location}
                 memberCount={group.memberCount}
+                members={group.members}
                 distance={group.distance}
                 coordinates={group.coordinates}
                 onPress={() => handleGroupPress(group.id)}
+                compact={true}
               />
             </View>
           ))}
@@ -122,17 +127,23 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 90, // Adjusted padding to 90px
   },
   cardsContainer: {
     height: CARD_HEIGHT,
-    backgroundColor: 'transparent',
+    position: 'absolute',
+    top: 10,
+    left: 0,
+    right: 0,
+    zIndex: 1,
   },
   cardsScrollContent: {
-    padding: 10,
+    paddingHorizontal: 10,
   },
   cardWrapper: {
-    width: 300,
+    width: 280,
     marginRight: 10,
+    height: CARD_HEIGHT,
   },
   mapContainer: {
     flex: 1,

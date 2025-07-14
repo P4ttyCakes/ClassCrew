@@ -3,8 +3,8 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = '#FC4C02';  // Strava Orange
-const tintColorDark = '#FC4C02';
+const tintColorLight = 'rgb(91, 134, 197)';
+const tintColorDark = 'rgb(91, 134, 197)';
 
 export const Colors = {
   light: {
@@ -19,7 +19,7 @@ export const Colors = {
     mapOverlay: 'rgba(255, 255, 255, 0.9)',
     success: '#4CAF50',
     warning: '#FFC107',
-    error: '#FC4C02',
+    error: 'rgb(91, 134, 197)',
   },
   dark: {
     text: '#FFFFFF',
@@ -33,6 +33,6 @@ export const Colors = {
     mapOverlay: 'rgba(36, 36, 40, 0.9)',
     success: '#4CAF50',
     warning: '#FFC107',
-    error: '#FC4C02',
+    error: 'rgb(91, 134, 197)',
   },
 };

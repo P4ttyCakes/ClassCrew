@@ -41,6 +41,7 @@ export default function HomeScreen() {
                 time={session.time}
                 location={session.location}
                 memberCount={session.memberCount}
+                members={session.members}
                 distance={session.distance}
                 coordinates={session.coordinates}
                 onPress={() => setSelectedSession(session.id)}

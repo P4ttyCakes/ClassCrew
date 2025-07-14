@@ -1,3 +1,9 @@
+export interface Member {
+  id: string;
+  name: string;
+  profilePicture: string;
+}
+
 export interface StudyGroup {
   id: string;
   title: string;
@@ -6,9 +12,20 @@ export interface StudyGroup {
   time: string;
   location: string;
   memberCount: number;
+  members: Member[];
   distance: string;
   coordinates: [number, number]; // [longitude, latitude]
 }
+
+// Mock profile pictures using https://i.pravatar.cc/ for demonstration
+const MOCK_MEMBERS: Member[] = [
+  { id: '1', name: 'Alex', profilePicture: 'https://i.pravatar.cc/150?img=1' },
+  { id: '2', name: 'Jordan', profilePicture: 'https://i.pravatar.cc/150?img=2' },
+  { id: '3', name: 'Taylor', profilePicture: 'https://i.pravatar.cc/150?img=3' },
+  { id: '4', name: 'Morgan', profilePicture: 'https://i.pravatar.cc/150?img=4' },
+  { id: '5', name: 'Casey', profilePicture: 'https://i.pravatar.cc/150?img=5' },
+  { id: '6', name: 'Sam', profilePicture: 'https://i.pravatar.cc/150?img=6' }
+];
 
 export const STUDY_GROUPS: StudyGroup[] = [
   {
@@ -19,6 +36,7 @@ export const STUDY_GROUPS: StudyGroup[] = [
     time: '3:00 PM - 5:00 PM',
     location: 'Bob and Betty Beyster Building (BBB)',
     memberCount: 4,
+    members: MOCK_MEMBERS.slice(0, 4),
     distance: '0.2 mi',
     coordinates: [-83.7174, 42.2927] // BBB coordinates
   },
@@ -30,6 +48,7 @@ export const STUDY_GROUPS: StudyGroup[] = [
     time: '4:30 PM - 6:30 PM',
     location: 'Chemistry Building',
     memberCount: 6,
+    members: MOCK_MEMBERS.slice(0, 6),
     distance: '0.3 mi',
     coordinates: [-83.7403, 42.2789] // Chemistry Building coordinates
   },
@@ -41,6 +60,7 @@ export const STUDY_GROUPS: StudyGroup[] = [
     time: '2:00 PM - 4:00 PM',
     location: 'Mason Hall',
     memberCount: 5,
+    members: MOCK_MEMBERS.slice(0, 5),
     distance: '0.1 mi',
     coordinates: [-83.7382, 42.2744] // Mason Hall coordinates
   },
@@ -52,7 +72,44 @@ export const STUDY_GROUPS: StudyGroup[] = [
     time: '1:00 PM - 3:00 PM',
     location: 'Ross School of Business',
     memberCount: 4,
+    members: MOCK_MEMBERS.slice(0, 4),
     distance: '0.4 mi',
     coordinates: [-83.7382, 42.2723] // Ross coordinates
+  },
+  {
+    id: '5',
+    title: 'Art History Discussion',
+    subject: 'art',
+    mood: 'casual',
+    time: '5:00 PM - 6:30 PM',
+    location: 'Michigan Union',
+    memberCount: 3,
+    members: MOCK_MEMBERS.slice(0, 3),
+    distance: '0.2 mi',
+    coordinates: [-83.7419, 42.2744] // Michigan Union coordinates
+  },
+  {
+    id: '6',
+    title: 'English Literature Review',
+    subject: 'english',
+    mood: 'review',
+    time: '4:00 PM - 6:00 PM',
+    location: 'Shapiro Library',
+    memberCount: 4,
+    members: MOCK_MEMBERS.slice(0, 4),
+    distance: '0.3 mi',
+    coordinates: [-83.7382, 42.2751] // Shapiro Library coordinates
+  },
+  {
+    id: '7',
+    title: 'World History Study Group',
+    subject: 'history',
+    mood: 'focused',
+    time: '3:30 PM - 5:30 PM',
+    location: 'Tisch Hall',
+    memberCount: 5,
+    members: MOCK_MEMBERS.slice(0, 5),
+    distance: '0.2 mi',
+    coordinates: [-83.7401, 42.2747] // Tisch Hall coordinates
   }
 ]; 
