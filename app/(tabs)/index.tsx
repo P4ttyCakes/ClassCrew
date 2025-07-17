@@ -40,6 +40,7 @@ export default function HomeScreen() {
                 mood={session.mood}
                 time={session.time}
                 location={session.location}
+                description={session.description}
                 memberCount={session.memberCount}
                 members={session.members}
                 distance={session.distance}

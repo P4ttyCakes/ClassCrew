@@ -127,6 +127,19 @@ export default function MapScreen() {
                     <span style="color: ${color};">🕒</span>
                     ${group.time}
                   </div>
+                  <div style="
+                    margin-top: 6px;
+                    padding: 8px;
+                    background-color: #f8f9fa;
+                    border-radius: 4px;
+                    border-left: 3px solid ${color};
+                  ">
+                    <div style="
+                      font-size: 11px;
+                      color: #666;
+                      line-height: 1.4;
+                    ">${group.description}</div>
+                  </div>
                 </div>
                 
                 <div style="
@@ -264,6 +277,7 @@ export default function MapScreen() {
                 mood={group.mood}
                 time={group.time}
                 location={group.location}
+                description={group.description}
                 memberCount={group.memberCount}
                 members={group.members}
                 distance={group.distance}

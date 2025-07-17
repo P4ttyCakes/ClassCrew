@@ -40,6 +40,7 @@ type StudyGroupCardProps = {
   mood: keyof typeof moodIcons;
   time: string;
   location: string;
+  description: string;
   memberCount: number;
   members: Member[];
   distance: string;
@@ -54,6 +55,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   mood,
   time,
   location,
+  description,
   memberCount,
   members,
   distance,
@@ -178,6 +180,12 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
                 {moodIcons[mood]} {moodLabels[mood]}
               </Text>
             </View>
+          </View>
+
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText} numberOfLines={2}>
+              {description}
+            </Text>
           </View>
 
           <View style={styles.footer}>
@@ -306,6 +314,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'white',
     fontWeight: '600',
+  },
+  descriptionContainer: {
+    marginBottom: 8,
+  },
+  descriptionText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 18,
   },
   footer: {
     flexDirection: 'row',
