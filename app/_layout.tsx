@@ -1,4 +1,5 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -25,6 +26,8 @@ export default function RootLayout() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Typing animation for welcome text
   const welcomeText = 'Welcome to ClassLink';
@@ -103,25 +106,35 @@ export default function RootLayout() {
           <Image source={require('../assets/images/Logo.png')} style={styles.logo} resizeMode="contain" />
           <Text style={styles.typedWelcome}>{typedWelcome}</Text>
           <Text style={[styles.title, { color: '#fff' }]}>{mode === 'login' ? 'Log In' : 'Sign Up'}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor="#A3A3A3"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            textContentType="emailAddress"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#A3A3A3"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            textContentType="password"
-          />
+          <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}> 
+            <Ionicons name="mail-outline" size={20} color={emailFocused ? ACCENT : '#A3A3A3'} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#A3A3A3"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+            />
+          </View>
+          <View style={[styles.inputWrapper, passwordFocused && styles.inputWrapperFocused]}> 
+            <Ionicons name="lock-closed-outline" size={20} color={passwordFocused ? ACCENT : '#A3A3A3'} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#A3A3A3"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={true}
+              textContentType="password"
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
+            />
+          </View>
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
           <Pressable style={[styles.button, loading && { opacity: 0.6 }]} onPress={handleAuth} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? 'Please wait...' : (mode === 'login' ? 'Log In' : 'Sign Up')}</Text>
@@ -179,20 +192,37 @@ const styles = StyleSheet.create({
     fontFamily: 'SpaceMono',
     letterSpacing: 1,
   },
-  input: {
-    width: '90%', // responsive width
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '90%',
     maxWidth: 400,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    borderRadius: 30,
+    backgroundColor: '#242428', // match app background
+    marginBottom: 18,
+    borderWidth: 0,
+    borderColor: 'transparent',
+    alignSelf: 'center',
+  },
+  inputWrapperFocused: {
+    borderColor: 'transparent',
+    borderWidth: 0,
+  },
+  input: {
+    flex: 1,
     paddingVertical: 14,
     paddingHorizontal: 18,
-    borderRadius: 30,
-    backgroundColor: '#2C2C2E',
-    color: '#fff',
+    color: '#222',
     fontSize: 16,
-    fontFamily: 'SpaceMono',
-    marginBottom: 18,
-    borderWidth: 1.5,
-    borderColor: '#3A3A3C',
-    alignSelf: 'center', // center input
+    backgroundColor: '#e9f0fa', // pill background
+    borderRadius: 30,
+    marginBottom: 0,
+    borderWidth: 0,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   button: {
     backgroundColor: ACCENT,
