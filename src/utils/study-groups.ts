@@ -1,10 +1,20 @@
-import { collection, DocumentData, getDocs, onSnapshot, query, QuerySnapshot, where } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query } from 'firebase/firestore';
 import { Member, StudyGroup } from '../../data/studyGroups';
 import { db } from '../config/firebase';
 
 // Convert Firestore data to our StudyGroup type
-const convertFirestoreGroup = (doc: DocumentData): StudyGroup => {
+const convertFirestoreGroup = (doc: any): StudyGroup => {
   const data = doc.data();
+
+  // Normalize coordinates: accept [lng, lat] or { longitude, latitude }
+  let coordinates: [number, number] | undefined = undefined;
+  const raw = data.coordinates;
+  if (Array.isArray(raw) && raw.length === 2) {
+    coordinates = [raw[0], raw[1]];
+  } else if (raw && typeof raw === 'object' && 'longitude' in raw && 'latitude' in raw) {
+    coordinates = [raw.longitude, raw.latitude];
+  }
+
   return {
     id: doc.id,
     title: data.title,
@@ -14,43 +24,58 @@ const convertFirestoreGroup = (doc: DocumentData): StudyGroup => {
     location: data.location,
     description: data.description,
     memberCount: data.memberCount,
-    users: data.users || [], // will be replaced with full objects later
+    members: [], // We'll populate this with user data
     distance: data.distance,
-    coordinates: [data.coordinates.longitude, data.coordinates.latitude]
-  };
+    coordinates: coordinates as [number, number],
+    // Also include Firestore user IDs to allow hydration in screens
+    ...(data.users ? { users: data.users } : {})
+  } as any;
 };
 
-// Fetch user details for an array of IDs
+// Function to fetch user details by their IDs
 export const fetchUsersByIds = async (ids: string[]): Promise<Member[]> => {
-  if (!ids.length) return [];
-  const usersRef = collection(db, 'users');
-  // Firestore 'in' queries are limited to 10 items per query
-  const chunks = [];
-  for (let i = 0; i < ids.length; i += 10) {
-    chunks.push(ids.slice(i, i + 10));
-  }
+  if (!ids || ids.length === 0) return [];
   const results: Member[] = [];
-  for (const chunk of chunks) {
-    const q = query(usersRef, where('id', 'in', chunk));
-    const snapshot = await getDocs(q);
-    snapshot.forEach(doc => results.push(doc.data() as Member));
+
+  for (const id of ids) {
+    const userDoc = await getDoc(doc(db, 'users', id));
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+      results.push({
+        id: data.id,
+        name: data.displayName,
+        profilePicture: data.profilePicture
+      });
+    }
   }
+
   return results;
 };
 
-// Subscribe to real-time updates
+// Subscribe to real-time study group updates
 export const subscribeToStudyGroups = (
   onUpdate: (groups: StudyGroup[]) => void,
   onError: (error: Error) => void
 ) => {
-  const studyGroupsRef = collection(db, 'studyGroups');
-  const q = query(studyGroupsRef);
+  const q = query(collection(db, 'studyGroups'));
   return onSnapshot(
     q,
-    (snapshot: QuerySnapshot) => {
-      const groups = snapshot.docs.map(convertFirestoreGroup);
-      onUpdate(groups || []);
+    async (snapshot) => {
+      try {
+        const groups = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const group = convertFirestoreGroup(doc);
+            const data = doc.data();
+            // Fetch member details for each user ID
+            group.members = await fetchUsersByIds(data.users || []);
+            return group;
+          })
+        );
+        onUpdate(groups);
+      } catch (error) {
+        onError(error as Error);
+      }
     },
     onError
   );
-}; 
+};

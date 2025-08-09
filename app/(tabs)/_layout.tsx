@@ -33,14 +33,14 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />, 
+          tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />,
         }}
       />
       <Tabs.Screen
         name="firestore-test"
         options={{
           title: 'Test DB',
-          tabBarIcon: ({ color }) => <Ionicons name="server" size={28} color={color} />, 
+          tabBarIcon: ({ color }) => <Ionicons name="server" size={28} color={color} />,
         }}
       />
     </Tabs>

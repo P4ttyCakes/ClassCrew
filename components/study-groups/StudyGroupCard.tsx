@@ -83,7 +83,8 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
           <p>${memberCount} members</p>
         `);
 
-      new mapboxgl.Marker()
+      const markerColor = (subjectGradients[subject] || subjectGradients['default'])[0];
+      new mapboxgl.Marker({ color: markerColor })
         .setLngLat(coordinates)
         .setPopup(popup)
         .addTo(map);

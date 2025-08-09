@@ -1,18 +1,16 @@
-import { collection, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, deleteDoc, getDocs, query } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { events } from './events';
 
-export const clearCollection = async (collectionName: string) => {
-  try {
-    const collectionRef = collection(db, collectionName);
-    const snapshot = await getDocs(collectionRef);
-    const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
-    await Promise.all(deletePromises);
-    console.log(`Cleared ${snapshot.docs.length} documents from ${collectionName}`);
-    return snapshot.docs.length;
-  } catch (error) {
-    console.error(`Error clearing ${collectionName}:`, error);
-    throw error;
+const clearCollection = async (collectionName: string) => {
+  const q = query(collection(db, collectionName));
+  const snapshot = await getDocs(q);
+  let clearedCount = 0;
+  for (const docRef of snapshot.docs) {
+    await deleteDoc(docRef.ref);
+    clearedCount++;
   }
+  return clearedCount;
 };
 
 export const clearAllData = async () => {
@@ -20,6 +18,7 @@ export const clearAllData = async () => {
     const usersCleared = await clearCollection('users');
     const groupsCleared = await clearCollection('studyGroups');
     console.log(`Cleared ${usersCleared} users and ${groupsCleared} study groups!`);
+    events.emit('dataCleared');
     return {
       usersCleared,
       groupsCleared
@@ -28,4 +27,4 @@ export const clearAllData = async () => {
     console.error('Error clearing data:', error);
     throw error;
   }
-}; 
+};

@@ -1,38 +1,41 @@
 import { addDoc, collection, doc, setDoc } from 'firebase/firestore';
-import { MOCK_MEMBERS, STUDY_GROUPS } from '../../data/studyGroups';
+import { Member, STUDY_GROUPS } from '../../data/studyGroups';
 import { db } from '../config/firebase';
 
-// Helper to generate mock user data
-const majors = ['Computer Science', 'Business', 'Biology', 'Art', 'History', 'Engineering'];
-const years = [1, 2, 3, 4];
+const MOCK_USERS: Member[] = [
+  { id: '1', name: 'Alex', profilePicture: 'https://i.pravatar.cc/150?img=1' },
+  { id: '2', name: 'Jordan', profilePicture: 'https://i.pravatar.cc/150?img=2' },
+  { id: '3', name: 'Taylor', profilePicture: 'https://i.pravatar.cc/150?img=3' },
+  { id: '4', name: 'Morgan', profilePicture: 'https://i.pravatar.cc/150?img=4' },
+  { id: '5', name: 'Casey', profilePicture: 'https://i.pravatar.cc/150?img=5' },
+  { id: '6', name: 'Sam', profilePicture: 'https://i.pravatar.cc/150?img=6' }
+];
 
-// Upload all mock users to Firestore with the correct schema
 export const migrateMockUsers = async () => {
   try {
     const usersRef = collection(db, 'users');
-    const userPromises = MOCK_MEMBERS.map((member, idx) => {
+    const userPromises = MOCK_USERS.map((member: Member) => {
       const userDoc = {
-        id: member.id, // Ensure id field is present
-        email: `${member.name.toLowerCase()}@example.com`,
+        id: member.id,
         displayName: member.name,
-        major: majors[idx % majors.length],
-        year: years[idx % years.length],
-        createdAt: new Date(),
-        joinedGroups: [],
         profilePicture: member.profilePicture,
+        email: `${member.name.toLowerCase()}@example.com`,
+        major: ['CS', 'Math', 'Physics', 'English'][Math.floor(Math.random() * 4)],
+        year: 2022 + Math.floor(Math.random() * 4),
+        createdAt: new Date(),
+        joinedGroups: []
       };
       return setDoc(doc(usersRef, member.id), userDoc);
     });
     await Promise.all(userPromises);
-    console.log(`Migrated ${MOCK_MEMBERS.length} users`);
-    return MOCK_MEMBERS.map(m => m.id);
+    console.log(`Migrated ${MOCK_USERS.length} users`);
+    return MOCK_USERS.map((m: Member) => m.id);
   } catch (error) {
     console.error('Error migrating users:', error);
     throw error;
   }
 };
 
-// Then migrate study groups
 export const migrateMockStudyGroups = async () => {
   try {
     // First migrate users to get their IDs
@@ -40,20 +43,15 @@ export const migrateMockStudyGroups = async () => {
     const studyGroupsRef = collection(db, 'studyGroups');
     const groupPromises = STUDY_GROUPS.map(group => {
       // Store only user IDs in the group
+      const { id, members, ...rest } = group;
       const firestoreGroup = {
-        ...group,
-        coordinates: {
-          latitude: group.coordinates[1],
-          longitude: group.coordinates[0]
-        },
+        ...rest,
         createdAt: new Date(),
         startTime: new Date(),
         endTime: new Date(Date.now() + 7200000),
         status: 'active',
-        users: group.members.map(m => m.id) // Only store user IDs
+        users: members.map(m => m.id) // Store user IDs
       };
-      delete firestoreGroup.id;
-      delete firestoreGroup.members;
       return addDoc(studyGroupsRef, firestoreGroup);
     });
     const groupDocs = await Promise.all(groupPromises);
@@ -74,4 +72,4 @@ export const migrateAllData = async () => {
     console.error('Migration failed:', error);
     throw error;
   }
-}; 
+};
