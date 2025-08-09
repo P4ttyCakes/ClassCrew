@@ -3,7 +3,6 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React from 'react';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Member } from '../../data/studyGroups';
 
 const subjectGradients: Record<string, [string, string]> = {
   math: ['#3B82F6', '#8B5CF6'],
@@ -40,9 +39,9 @@ type StudyGroupCardProps = {
   mood: keyof typeof moodIcons;
   time: string;
   location: string;
-  description: string;
+  description?: string;
   memberCount: number;
-  members: Member[];
+  users: Array<{ id: string; name?: string; displayName?: string; profilePicture?: string }>;
   distance: string;
   coordinates: [number, number];
   onPress: () => void;
@@ -57,7 +56,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   location,
   description,
   memberCount,
-  members,
+  users = [],
   distance,
   coordinates,
   onPress,
@@ -95,25 +94,29 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
     }
   }, [compact, coordinates, title, location, time, memberCount]);
 
-  const renderMemberPictures = () => {
+  const renderUserPictures = () => {
     const displayCount = 5;
-    const visibleMembers = members.slice(0, displayCount);
-    const remainingCount = members.length - displayCount;
-
+    console.log('User pictures:', users);
+    const visibleUsers = Array.isArray(users) ? users.slice(0, displayCount) : [];
+    const remainingCount = Array.isArray(users) ? users.length - displayCount : 0;
     return (
       <View style={styles.memberPictures}>
-        {visibleMembers.map((member, index) => (
+        {visibleUsers.map((user, index) => (
           <View
-            key={member.id}
+            key={user.id}
             style={[
               styles.memberPictureContainer,
               { marginLeft: index > 0 ? -8 : 0 }
             ]}
           >
-            <Image
-              source={{ uri: member.profilePicture }}
-              style={styles.memberPicture}
-            />
+            {user.profilePicture ? (
+              <Image
+                source={{ uri: user.profilePicture }}
+                style={styles.memberPicture}
+              />
+            ) : (
+              <View style={[styles.memberPicture, { backgroundColor: '#ccc' }]} />
+            )}
           </View>
         ))}
         {remainingCount > 0 && (
@@ -131,7 +134,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
     return (
       <TouchableOpacity onPress={onPress} style={styles.compactContainer}>
         <LinearGradient
-          colors={subjectGradients[subject]}
+          colors={subjectGradients[subject] || subjectGradients['default']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.compactGradient}
@@ -163,7 +166,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <LinearGradient
-        colors={subjectGradients[subject]}
+        colors={subjectGradients[subject] || subjectGradients['default']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -191,7 +194,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
           <View style={styles.footer}>
             <View style={styles.footerLeft}>
               <Text style={styles.location} numberOfLines={1}>{location}</Text>
-              {renderMemberPictures()}
+              {renderUserPictures()}
             </View>
           </View>
         </View>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const subjectGradients = {
   math: ['#3B82F6', '#8B5CF6'],
@@ -46,7 +46,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <LinearGradient
-        colors={subjectGradients[subject]}
+        colors={subjectGradients[subject] || subjectGradients['default']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}

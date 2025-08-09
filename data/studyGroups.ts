@@ -19,7 +19,7 @@ export interface StudyGroup {
 }
 
 // Mock profile pictures using https://i.pravatar.cc/ for demonstration
-const MOCK_MEMBERS: Member[] = [
+export const MOCK_MEMBERS: Member[] = [
   { id: '1', name: 'Alex', profilePicture: 'https://i.pravatar.cc/150?img=1' },
   { id: '2', name: 'Jordan', profilePicture: 'https://i.pravatar.cc/150?img=2' },
   { id: '3', name: 'Taylor', profilePicture: 'https://i.pravatar.cc/150?img=3' },

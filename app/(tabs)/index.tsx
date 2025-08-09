@@ -1,13 +1,12 @@
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import React, { useState } from 'react';
-import { Alert, Button, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { StudyGroupCard } from '../../components/study-groups/StudyGroupCard';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
 import { Colors } from '../../constants/Colors';
-import { STUDY_GROUPS } from '../../data/studyGroups';
+import { StudyGroup } from '../../data/studyGroups';
 import { useColorScheme } from '../../hooks/useColorScheme';
-import { app } from '../../src/config/firebase';
+import { fetchUsersByIds, subscribeToStudyGroups } from '../../src/utils/study-groups';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_WIDTH = SCREEN_WIDTH * 0.85; // 85% of screen width
@@ -16,75 +15,93 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
+  const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Firebase test function
-  const testFirebaseAuth = async () => {
-    const auth = getAuth(app);
-    const email = 'superpandalu@gmail.com';
-    const password = 'testPassword';
-    try {
-      // Try to create the user
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('User created:', userCredential.user);
-      Alert.alert('Firebase', 'User created: ' + userCredential.user.email);
-    } catch (error: any) {
-      if (error.code === 'auth/email-already-in-use') {
-        // If already exists, try to sign in
-        try {
-          const userCredential = await signInWithEmailAndPassword(auth, email, password);
-          console.log('Signed in:', userCredential.user);
-          Alert.alert('Firebase', 'Signed in: ' + userCredential.user.email);
-        } catch (signInError: any) {
-          console.error('Sign in error:', signInError);
-          Alert.alert('Firebase', 'Sign in error: ' + signInError.message);
-        }
-      } else {
-        console.error('Error creating user:', error);
-        Alert.alert('Firebase', 'Error: ' + error.message);
+  // Fetch groups in real-time
+  useEffect(() => {
+    const unsubscribe = subscribeToStudyGroups(
+      (groups) => {
+        setStudyGroups(groups);
+        setLoading(false);
+      },
+      (error) => {
+        setError(error.message);
+        setLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch member details for each group
+  const [groupsWithUsers, setGroupsWithUsers] = useState<StudyGroup[]>([]);
+  useEffect(() => {
+    async function fetchAllUsers() {
+      setLoading(true);
+      try {
+        const updatedGroups = await Promise.all(
+          studyGroups.map(async (group) => {
+            // group.users is an array of user IDs
+            const users = await fetchUsersByIds(Array.isArray(group.users) ? group.users : []);
+            return { ...group, users };
+          })
+        );
+        setGroupsWithUsers(updatedGroups);
+        setLoading(false);
+      } catch (err: any) {
+        setError(err.message);
+        setLoading(false);
       }
     }
-    // Log current user
-    console.log('Current user:', auth.currentUser);
-  };
+    if (studyGroups.length) fetchAllUsers();
+    else setGroupsWithUsers([]);
+  }, [studyGroups]);
 
   return (
     <ThemedView style={styles.container}>
-      {/* Firebase Test Button */}
-      <View style={{ padding: 20 }}>
-        <Button title="Test Firebase Auth" onPress={testFirebaseAuth} />
-      </View>
       {/* Header */}
       <View style={styles.header}>
         <ThemedText type="title">Study Sessions</ThemedText>
       </View>
-
       {/* Session Cards */}
       <ScrollView 
         style={styles.sessionsContainer} 
         contentContainerStyle={styles.sessionsContent}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Nearby Study Sessions
-        </ThemedText>
-        <View style={styles.cardsContainer}>
-          {STUDY_GROUPS.map((session) => (
-            <View key={session.id} style={styles.cardWrapper}>
-              <StudyGroupCard
-                title={session.title}
-                subject={session.subject}
-                mood={session.mood}
-                time={session.time}
-                location={session.location}
-                description={session.description}
-                memberCount={session.memberCount}
-                members={session.members}
-                distance={session.distance}
-                coordinates={session.coordinates}
-                onPress={() => setSelectedSession(session.id)}
-              />
+        <View>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            Nearby Study Sessions
+          </ThemedText>
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors[colorScheme].text} style={styles.loader} />
+          ) : error ? (
+            <ThemedText style={styles.errorText}>{error}</ThemedText>
+          ) : (
+            <View style={styles.cardsContainer}>
+              {Array.isArray(groupsWithUsers) && groupsWithUsers.map((session) => {
+                console.log('Rendering group:', session.title, 'users:', session.users);
+                return (
+                  <View key={session.id} style={styles.cardWrapper}>
+                    <StudyGroupCard
+                      title={session.title}
+                      subject={session.subject}
+                      mood={session.mood}
+                      time={session.time}
+                      location={session.location}
+                      description={session.description}
+                      memberCount={session.memberCount}
+                      users={session.users}
+                      distance={session.distance}
+                      coordinates={session.coordinates}
+                      onPress={() => setSelectedSession(session.id)}
+                    />
+                  </View>
+                );
+              })}
             </View>
-          ))}
+          )}
         </View>
       </ScrollView>
     </ThemedView>
@@ -120,5 +137,13 @@ const styles = StyleSheet.create({
   cardWrapper: {
     width: CARD_WIDTH,
     marginBottom: 20,
-  }
+  },
+  loader: {
+    marginTop: 20,
+  },
+  errorText: {
+    marginTop: 20,
+    textAlign: 'center',
+    color: '#FF4444',
+  },
 });
