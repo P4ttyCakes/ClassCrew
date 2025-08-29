@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useColorScheme } from '../../hooks/useColorScheme';
+import { events } from '../../src/utils/events';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -34,6 +35,24 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <Ionicons name="person" size={28} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="create-group"
+        options={{
+          title: 'Create',
+          tabBarButton: (props) => (
+            <Pressable
+              onPress={() => events.emit('openCreate')}
+              accessibilityRole={props.accessibilityRole}
+              accessibilityState={props.accessibilityState}
+              accessibilityLabel={props.accessibilityLabel}
+              testID={props.testID}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Ionicons name="add-circle" size={28} color={props?.accessibilityState?.selected ? 'rgb(91, 134, 197)' : '#666'} />
+            </Pressable>
+          ),
         }}
       />
       <Tabs.Screen

@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React from 'react';
 import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getEmojiForSubject, getThemeForString } from '../../src/constants/subjects';
 
 const subjectGradients: Record<string, [string, string]> = {
   math: ['#3B82F6', '#8B5CF6'],
@@ -44,6 +45,7 @@ type StudyGroupCardProps = {
   users: Array<{ id: string; name?: string; displayName?: string; profilePicture?: string }>;
   distance: string;
   coordinates: [number, number];
+  class: string;
   onPress: () => void;
   compact?: boolean;
 };
@@ -59,6 +61,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   users = [],
   distance,
   coordinates,
+  class: department,
   onPress,
   compact = false
 }) => {
@@ -83,7 +86,7 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
           <p>${memberCount} members</p>
         `);
 
-      const markerColor = (subjectGradients[subject] || subjectGradients['default'])[0];
+      const markerColor = theme.tint;
       new mapboxgl.Marker({ color: markerColor })
         .setLngLat(coordinates)
         .setPopup(popup)
@@ -131,11 +134,13 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
     );
   };
 
+  const theme = getThemeForString(department || title);
+
   if (compact) {
     return (
       <TouchableOpacity onPress={onPress} style={styles.compactContainer}>
         <LinearGradient
-          colors={subjectGradients[subject] || subjectGradients['default']}
+          colors={theme.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.compactGradient}
@@ -167,14 +172,21 @@ export const StudyGroupCard: React.FC<StudyGroupCardProps> = ({
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <LinearGradient
-        colors={subjectGradients[subject] || subjectGradients['default']}
+        colors={theme.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
+            <Text style={styles.title} numberOfLines={1}>
+              {getEmojiForSubject(department || subject)} {title}
+            </Text>
+            {!!department && (
+              <View style={[styles.classTag, { borderColor: 'rgba(255,255,255,0.6)', backgroundColor: 'rgba(0,0,0,0.2)' }]}>
+                <Text style={styles.classTagText}>{department}</Text>
+              </View>
+            )}
           </View>
 
           <View style={styles.metadata}>
@@ -288,6 +300,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  classTag: {
+    marginLeft: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  classTagText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   title: {
     fontSize: 22,

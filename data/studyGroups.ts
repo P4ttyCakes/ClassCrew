@@ -7,7 +7,7 @@ export interface Member {
 export interface StudyGroup {
   id: string;
   title: string;
-  subject: 'math' | 'english' | 'science' | 'history' | 'computer' | 'business' | 'art';
+  subject: string; // Department prefix (e.g., EECS, MATH)
   mood: 'focused' | 'casual' | 'exam_prep' | 'project' | 'review' | 'homework';
   time: string;
   location: string;
@@ -16,6 +16,7 @@ export interface StudyGroup {
   members: Member[];
   distance: string;
   coordinates: [number, number]; // [longitude, latitude]
+  Class: string; // Full course code (e.g., EECS 280)
 }
 
 // Mock profile pictures using https://i.pravatar.cc/ for demonstration
@@ -32,7 +33,7 @@ export const STUDY_GROUPS: StudyGroup[] = [
   {
     id: '1',
     title: 'EECS 280 Study Session',
-    subject: 'computer',
+    subject: 'EECS',
     mood: 'exam_prep',
     time: '3:00 PM - 5:00 PM',
     location: 'Bob and Betty Beyster Building (BBB)',
@@ -40,12 +41,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 4,
     members: MOCK_MEMBERS.slice(0, 4),
     distance: '0.2 mi',
-    coordinates: [-83.7174, 42.2927] // BBB coordinates
+    coordinates: [-83.7174, 42.2927], // BBB coordinates
+    Class: 'EECS 280'
   },
   {
     id: '2',
     title: 'Organic Chemistry Review',
-    subject: 'science',
+    subject: 'CHEM',
     mood: 'focused',
     time: '4:30 PM - 6:30 PM',
     location: 'Chemistry Building',
@@ -53,12 +55,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 6,
     members: MOCK_MEMBERS.slice(0, 6),
     distance: '0.3 mi',
-    coordinates: [-83.7403, 42.2789] // Chemistry Building coordinates
+    coordinates: [-83.7403, 42.2789], // Chemistry Building coordinates
+    Class: 'CHEM 210'
   },
   {
     id: '3',
     title: 'Calculus II Group',
-    subject: 'math',
+    subject: 'MATH',
     mood: 'homework',
     time: '2:00 PM - 4:00 PM',
     location: 'Mason Hall',
@@ -66,12 +69,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 5,
     members: MOCK_MEMBERS.slice(0, 5),
     distance: '0.1 mi',
-    coordinates: [-83.7382, 42.2744] // Mason Hall coordinates
+    coordinates: [-83.7382, 42.2744], // Mason Hall coordinates
+    Class: 'MATH 116'
   },
   {
     id: '4',
     title: 'Business Strategy Project',
-    subject: 'business',
+    subject: 'STRATEGY',
     mood: 'project',
     time: '1:00 PM - 3:00 PM',
     location: 'Ross School of Business',
@@ -79,12 +83,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 4,
     members: MOCK_MEMBERS.slice(0, 4),
     distance: '0.4 mi',
-    coordinates: [-83.7382, 42.2723] // Ross coordinates
+    coordinates: [-83.7382, 42.2723], // Ross coordinates
+    Class: 'STRATEGY 390'
   },
   {
     id: '5',
     title: 'Art History Discussion',
-    subject: 'art',
+    subject: 'HIST',
     mood: 'casual',
     time: '5:00 PM - 6:30 PM',
     location: 'Michigan Union',
@@ -92,12 +97,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 3,
     members: MOCK_MEMBERS.slice(0, 3),
     distance: '0.2 mi',
-    coordinates: [-83.7419, 42.2744] // Michigan Union coordinates
+    coordinates: [-83.7419, 42.2744], // Michigan Union coordinates
+    Class: 'HIST 239'
   },
   {
     id: '6',
     title: 'English Literature Review',
-    subject: 'english',
+    subject: 'ENGLISH',
     mood: 'review',
     time: '4:00 PM - 6:00 PM',
     location: 'Shapiro Library',
@@ -105,12 +111,13 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 4,
     members: MOCK_MEMBERS.slice(0, 4),
     distance: '0.3 mi',
-    coordinates: [-83.7382, 42.2751] // Shapiro Library coordinates
+    coordinates: [-83.7382, 42.2751], // Shapiro Library coordinates
+    Class: 'ENGLISH 260'
   },
   {
     id: '7',
     title: 'World History Study Group',
-    subject: 'history',
+    subject: 'HIST',
     mood: 'focused',
     time: '3:30 PM - 5:30 PM',
     location: 'Tisch Hall',
@@ -118,6 +125,7 @@ export const STUDY_GROUPS: StudyGroup[] = [
     memberCount: 5,
     members: MOCK_MEMBERS.slice(0, 5),
     distance: '0.2 mi',
-    coordinates: [-83.7401, 42.2747] // Tisch Hall coordinates
+    coordinates: [-83.7401, 42.2747], // Tisch Hall coordinates
+    Class: 'HIST 101'
   }
 ]; 

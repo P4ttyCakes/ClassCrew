@@ -2,13 +2,14 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import 'react-native-reanimated';
-import { app as firebaseApp } from '../src/config/firebase';
+import { db, app as firebaseApp } from '../src/config/firebase';
 
 const ACCENT = 'rgb(91, 134, 197)';
 const DARK_BG = '#242428';
@@ -23,6 +24,7 @@ export default function RootLayout() {
   // Login/signup form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +32,7 @@ export default function RootLayout() {
   const [passwordFocused, setPasswordFocused] = useState(false);
 
   // Typing animation for welcome text
-  const welcomeText = 'Welcome to ClassLink';
+  const welcomeText = 'Welcome to ClassCrew';
   const [typedWelcome, setTypedWelcome] = useState('');
   useEffect(() => {
     if (showAuth) {
@@ -51,10 +53,6 @@ export default function RootLayout() {
     }
   }, [showAuth]);
 
-  if (!loaded) {
-    return null;
-  }
-
   const handleAuth = async () => {
     setLoading(true);
     setError('');
@@ -63,6 +61,7 @@ export default function RootLayout() {
       if (mode === 'login') {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
+        // Create with email/password, then (optionally) set username in profile later
         await createUserWithEmailAndPassword(auth, email, password);
       }
       setShowAuth(false);
@@ -96,6 +95,32 @@ export default function RootLayout() {
     }
   };
 
+  // After auth, check if profile is complete; if not, navigate to Profile to complete onboarding
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        const auth = getAuth(firebaseApp);
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const snap = await getDoc(doc(db, 'users', uid));
+        const profileComplete = snap.exists() ? !!(snap.data() as any).profileComplete : false;
+        if (!profileComplete) {
+          router.push('/(tabs)/profile');
+        }
+      } catch (e) {
+        // no-op; default flow continues
+      }
+    };
+    if (!showAuth) {
+      checkProfile();
+    }
+  }, [showAuth]);
+
+  // Defer font-loaded short-circuit until after hooks are declared to keep hook order consistent
+  if (!loaded) {
+    return null;
+  }
+
   if (showAuth) {
     return (
       <KeyboardAvoidingView
@@ -103,9 +128,30 @@ export default function RootLayout() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.authContainer, { backgroundColor: DARK_BG }]}> 
-          <Image source={require('../assets/images/Logo.png')} style={styles.logo} resizeMode="contain" />
+          <Image
+            source={require('../assets/images/Logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+            accessible
+            accessibilityLabel="ClassCrew logo"
+          />
           <Text style={styles.typedWelcome}>{typedWelcome}</Text>
           <Text style={[styles.title, { color: '#fff' }]}>{mode === 'login' ? 'Log In' : 'Sign Up'}</Text>
+          {mode === 'login' ? (
+            <></>
+          ) : (
+            <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}> 
+              <Ionicons name="person-outline" size={20} color={emailFocused ? ACCENT : '#A3A3A3'} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                placeholderTextColor="#A3A3A3"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+              />
+            </View>
+          )}
           <View style={[styles.inputWrapper, emailFocused && styles.inputWrapperFocused]}> 
             <Ionicons name="mail-outline" size={20} color={emailFocused ? ACCENT : '#A3A3A3'} style={styles.inputIcon} />
             <TextInput

@@ -5,6 +5,7 @@ import { ActivityIndicator, Platform, ScrollView, StyleSheet, Text, View } from 
 import { StudyGroupCard } from '../../components/study-groups/StudyGroupCard';
 import { ThemedView } from '../../components/ThemedView';
 import { StudyGroup } from '../../data/studyGroups';
+import { getEmojiForSubject, getThemeForString } from '../../src/constants/subjects';
 import { events } from '../../src/utils/events';
 import { subscribeToStudyGroups } from '../../src/utils/study-groups';
 
@@ -97,7 +98,8 @@ export default function MapScreen() {
       markers.current = [];
 
       studyGroups.forEach(group => {
-        const color = subjectGradients[group.subject][0];
+        const theme = getThemeForString((group as any).subject || (group as any).Class || group.title || '');
+        const color = theme.tint;
         const displayCount = 3;
         const memberList = (group as any).members ?? (group as any).users ?? [];
         const visibleMembers = memberList.slice(0, displayCount);
@@ -134,7 +136,7 @@ export default function MapScreen() {
           ">+${remainingCount}</div>
         ` : '');
 
-        const popupHTML = `
+          const popupHTML = `
           <div style="
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             padding: 8px 0;
@@ -151,7 +153,7 @@ export default function MapScreen() {
                 color: white;
                 font-size: 14px;
                 font-weight: 600;
-              ">${group.title}</h3>
+                ">${getEmojiForSubject((group as any).subject || '')} ${group.title}</h3>
             </div>
             <div style="
               display: flex;
@@ -315,9 +317,9 @@ export default function MapScreen() {
             studyGroups.length > 0 ? (
               studyGroups.map((group) => (
                 <View key={group.id} style={styles.cardWrapper}>
-                  <StudyGroupCard
+                <StudyGroupCard
                     title={group.title}
-                    subject={group.subject}
+                  subject={(group as any).subject as any}
                     mood={group.mood}
                     time={group.time}
                     location={group.location}
@@ -326,6 +328,7 @@ export default function MapScreen() {
                     users={group.members}
                     distance={group.distance}
                     coordinates={group.coordinates}
+                  class={(group as any).subject || ''}
                   onPress={() => handleGroupPress(group.id)}
                     compact={true}
                   />

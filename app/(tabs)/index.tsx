@@ -1,5 +1,7 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import CreateGroupForm from '../../components/create-group/CreateGroupForm';
 import { StudyGroupCard } from '../../components/study-groups/StudyGroupCard';
 import { ThemedText } from '../../components/ThemedText';
 import { ThemedView } from '../../components/ThemedView';
@@ -21,6 +23,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showCreate, setShowCreate] = useState(false);
 
   // Fetch groups in real-time
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function HomeScreen() {
       setLoading(true); // show spinner until subscription resolves
       setRefreshKey((k) => k + 1);
     });
+    const openCreateUnsub = events.subscribe('openCreate', () => setShowCreate(true));
     return () => unsub();
   }, []);
 
@@ -93,10 +97,15 @@ export default function HomeScreen() {
   }, [studyGroups]);
 
   return (
+    <>
     <ThemedView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <ThemedText type="title">Study Sessions</ThemedText>
+        <Pressable onPress={() => setShowCreate(true)} style={styles.createButton}>
+          <Ionicons name="add" size={18} color="#fff" />
+          <ThemedText style={styles.createButtonText}>Create</ThemedText>
+        </Pressable>
       </View>
       {/* Session Cards */}
       <ScrollView 
@@ -106,7 +115,13 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
+          <ThemedText type="subtitle" style={styles.sectionTitleUpNext}>
+            🗓️ Your upcoming Study Sessions
+          </ThemedText>
+          {/* Placeholder until we implement membership tracking */}
+          <ThemedText style={styles.placeholder}>No upcoming sessions yet</ThemedText>
+
+          <ThemedText type="subtitle" style={styles.sectionTitleNearby}>
             Nearby Study Sessions
           </ThemedText>
           {loading ? (
@@ -121,7 +136,7 @@ export default function HomeScreen() {
                   <View key={session.id} style={styles.cardWrapper}>
                     <StudyGroupCard
                       title={session.title}
-                      subject={session.subject}
+                      subject={(session as any).subject as any}
                       mood={session.mood}
                       time={session.time}
                       location={session.location}
@@ -130,6 +145,7 @@ export default function HomeScreen() {
                       users={session.users ?? (session as any).members ?? []}
                       distance={session.distance}
                       coordinates={session.coordinates}
+                      class={(session as any).subject || ''}
                       onPress={() => setSelectedSession(session.id)}
                     />
                   </View>
@@ -140,6 +156,14 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
     </ThemedView>
+    <Modal visible={showCreate} animationType="fade" onRequestClose={() => setShowCreate(false)} transparent>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalCenterCard}>
+          <CreateGroupForm onClose={() => setShowCreate(false)} />
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -155,6 +179,19 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
   },
+  createButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: ACCENT,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
   sessionsContainer: {
     flex: 1,
   },
@@ -164,6 +201,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   sectionTitle: {
+    marginBottom: 16,
+  },
+  sectionTitleUpNext: {
+    marginBottom: 12,
+  },
+  sectionTitleNearby: {
+    marginTop: 28,
     marginBottom: 16,
   },
   cardsContainer: {
@@ -180,5 +224,24 @@ const styles = StyleSheet.create({
     marginTop: 20,
     textAlign: 'center',
     color: '#FF4444',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCenterCard: {
+    backgroundColor: 'rgba(36,36,40,1)',
+    borderRadius: 16,
+    width: '92%',
+    maxWidth: 720,
+    maxHeight: '85%',
+    overflow: 'hidden',
+  },
+  placeholder: {
+    marginBottom: 32,
+    textAlign: 'center',
+    color: '#888',
   },
 });
