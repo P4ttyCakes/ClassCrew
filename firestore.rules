@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // Allow public reads so the app can load before login; writes require auth
+    match /studyGroups/{groupId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // User profiles: readable when signed in; only owner can write
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isOwner(userId);
+    }
+
+    // Usernames mapping for lookups (read public, writes by auth)
+    match /usernames/{username} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+
